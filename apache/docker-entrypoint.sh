@@ -65,7 +65,8 @@ try {
 
 	$mysql->close();
 } catch(Exception $e) {
-	fwrite($stderr, "\n".$e->getMessage()."\n".$e->getTraceAsString() );
+	fwrite($stderr, "\n"."Exception Occurred while connecting to MySQL, reason: ".$e->getMessage());
+	fwrite($stderr, "\nStacktrace:\n".$e->getTraceAsString()."\n" );
 }
 EOPHP
 
