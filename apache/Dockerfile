@@ -1,13 +1,18 @@
-FROM php:7.1-apache
+FROM php:8.3-apache
 
-MAINTAINER Vadim Homchik <homchik@gmail.com> (@vh)
+LABEL authors="Vadim Homchik <homchik@gmail.com> (@vh)"
 
 RUN a2enmod rewrite
+RUN apt-get update && apt-get install -y unzip
 
 # install the PHP extensions we need
-RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev unzip sudo && rm -rf /var/lib/apt/lists/* \
-	&& docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr \
-	&& docker-php-ext-install gd opcache mysqli pdo pdo_mysql
+
+ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+
+RUN install-php-extensions gd zip pdo_mysql opcache mysqli
+
+# Use the default production configuration
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # set recommended PHP.ini settings
 # see https://secure.php.net/manual/en/opcache.installation.php
@@ -15,19 +20,15 @@ RUN { \
 		echo 'opcache.memory_consumption=128'; \
 		echo 'opcache.interned_strings_buffer=8'; \
 		echo 'opcache.max_accelerated_files=4000'; \
-		echo 'opcache.fast_shutdown=1'; \
+		echo 'opcache.revalidate_freq=60'; \
 		echo 'opcache.enable_cli=1'; \
 	} > /usr/local/etc/php/conf.d/opcache-recommended.ini
 
-# set timezone
-RUN { \
-		echo 'date.timezone=GMT+0'; \
-	} > /usr/local/etc/php/conf.d/datetime.ini
 
 VOLUME /var/www/html
 
-ENV MODX_VERSION 2.7.0
-ENV MODX_SHA1 79f7399b6cb2a7508852f2e82821a0d5670ef41f
+ENV MODX_VERSION=3.0.5
+ENV MODX_SHA1=c8abde97ab72be7472549270e9af65d9d959062e
 
 # upstream tarballs include ./modx-${MODX_VERSION}/
 RUN curl -o modx.zip -SL http://modx.com/download/direct/modx-${MODX_VERSION}-pl.zip \

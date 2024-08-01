@@ -41,28 +41,33 @@ $stderr = fopen('php://stderr', 'w');
 
 list($host, $port) = explode(':', $argv[1], 2);
 
-$maxTries = 10;
-do {
-	$mysql = new mysqli($host, $argv[2], $argv[3], '', (int)$port);
-	if ($mysql->connect_error) {
-		fwrite($stderr, "\n" . 'MySQL Connection Error: (' . $mysql->connect_errno . ') ' . $mysql->connect_error . "\n");
-		--$maxTries;
-		if ($maxTries <= 0) {
-			exit(1);
+try {
+	$maxTries = 10;
+	do {
+		$mysql = new mysqli($host, $argv[2], $argv[3], '', (int)$port);
+		if ($mysql->connect_error) {
+			fwrite($stderr, "\n" . 'MySQL Connection Error: (' . $mysql->connect_errno . ') ' . $mysql->connect_error . "\n");
+			--$maxTries;
+			if ($maxTries <= 0) {
+				exit(1);
+			}
+			sleep(3);
 		}
-		sleep(3);
-	}
-} while ($mysql->connect_error);
+	} while ($mysql->connect_error);
 
-if (!$mysql->query('CREATE DATABASE IF NOT EXISTS `' . $mysql->real_escape_string($argv[4]) . '` ' .
-	'DEFAULT CHARACTER SET = \'utf8\' DEFAULT COLLATE \'utf8_general_ci\'')) {
+	if (!$mysql->query('CREATE DATABASE IF NOT EXISTS `' . $mysql->real_escape_string($argv[4]) . '` ' .
+		'DEFAULT CHARACTER SET = \'utf8\' DEFAULT COLLATE \'utf8_general_ci\'')) {
 
-	fwrite($stderr, "\n" . 'MySQL "CREATE DATABASE" Error: ' . $mysql->error . "\n");
+		fwrite($stderr, "\n" . 'MySQL "CREATE DATABASE" Error: ' . $mysql->error . "\n");
+		$mysql->close();
+		exit(1);
+	} 
+
 	$mysql->close();
-	exit(1);
+} catch(Exception $e) {
+	fwrite($stderr, "\n"."Exception Occurred while connecting to MySQL, reason: ".$e->getMessage());
+	fwrite($stderr, "\nStacktrace:\n".$e->getTraceAsString()."\n" );
 }
-
-$mysql->close();
 EOPHP
 
 	if ! [ -e index.php -a -e core/config/config.inc.php ]; then
@@ -75,7 +80,7 @@ EOPHP
 
 		tar cf - --one-file-system -C /usr/src/modx . | tar xf -
 
-    echo >&2 "Complete! MODX has been successfully copied to $(pwd)"
+    	echo >&2 "Complete! MODX has been successfully copied to $(pwd)"
 
 		: ${MODX_ADMIN_USER:='admin'}
 		: ${MODX_ADMIN_PASSWORD:='admin'}
@@ -116,7 +121,7 @@ EOPHP
 EOF
 		chown www-data:www-data setup/config.xml
 
-    sudo -u www-data php setup/index.php --installmode=new
+    	runuser -u www-data -- php setup/index.php --installmode=new
   else
 		UPGRADE=$(TERM=dumb php -- "$MODX_VERSION" <<'EOPHP'
 <?php
