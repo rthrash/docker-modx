@@ -80,7 +80,7 @@ EOPHP
 
 		tar cf - --one-file-system -C /usr/src/modx . | tar xf -
 
-    echo >&2 "Complete! MODX has been successfully copied to $(pwd)"
+    	echo >&2 "Complete! MODX has been successfully copied to $(pwd)"
 
 		: ${MODX_ADMIN_USER:='admin'}
 		: ${MODX_ADMIN_PASSWORD:='admin'}
@@ -121,7 +121,7 @@ EOPHP
 EOF
 		chown www-data:www-data setup/config.xml
 
-    runuser -u www-data -- php setup/index.php --installmode=new
+    	runuser -u www-data -- php setup/index.php --installmode=new
   else
 		UPGRADE=$(TERM=dumb php -- "$MODX_VERSION" <<'EOPHP'
 <?php

@@ -1,6 +1,6 @@
 FROM php:8.3-apache
 
-MAINTAINER Vadim Homchik <homchik@gmail.com> (@vh)
+LABEL authors="Vadim Homchik <homchik@gmail.com> (@vh)"
 
 RUN a2enmod rewrite
 RUN apt-get update && apt-get install -y unzip
@@ -27,8 +27,8 @@ RUN { \
 
 VOLUME /var/www/html
 
-ENV MODX_VERSION 3.0.5
-ENV MODX_SHA1 c8abde97ab72be7472549270e9af65d9d959062e
+ENV MODX_VERSION=3.0.5
+ENV MODX_SHA1=c8abde97ab72be7472549270e9af65d9d959062e
 
 # upstream tarballs include ./modx-${MODX_VERSION}/
 RUN curl -o modx.zip -SL http://modx.com/download/direct/modx-${MODX_VERSION}-pl.zip \
